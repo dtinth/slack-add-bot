@@ -69,7 +69,7 @@ const indent = require('indent-string')
 const _ = require('lodash')
 
 function updateChangelog(existingChangelog, pulls, version = 'UNRELEASED') {
-  const userListRegExp = /((?:\[@\w+\]: https.+\n)+)/
+  const userListRegExp = /((?:\[@\w+\]: https.+\r?\n)+)/
   const userList = existingChangelog.match(userListRegExp)
 
   const existingUsers = new Set()
