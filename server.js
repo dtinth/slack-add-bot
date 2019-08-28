@@ -219,11 +219,15 @@ app.post('/prepare/:version', async function(req, res, next) {
     const packageJSONUpdateResponse = await gh.repos.createOrUpdateFile({
       owner,
       repo,
-      path: 'CHANGELOG.md',
-      message: 'Prepare changelog for ' + preVersion,
-      content: Buffer.from(newChangelog).toString('base64'),
+      path: 'package.json',
+      message: 'Update package.json to version ' + preVersion,
+      content: Buffer.from(
+        Buffer.from(packageJSONResponse.data.content, 'base64')
+          .toString()
+          .replace(/"version": "([^"]+)"/, `"version": "${preVersion.replace(/^v/, '')}"`)
+      ).toString('base64'),
       branch: 'release-train/prepare',
-      sha: changelogResponse.data.sha,
+      sha: packageJSONResponse.data.sha,
     })
     headSha = packageJSONUpdateResponse.data.commit.sha
     log(`Updated package.json -> ${headSha}`)
