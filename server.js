@@ -91,7 +91,7 @@ function updateChangelog(existingChangelog, pulls, version = 'UNRELEASED') {
     .filter(x => x.match)
     .map(x => {
       pullMap.set(x.pull.number, x.pull)
-      const text = x.match[1].trim().replace(/\[@([^\]\s]+)\]/, (a, id) => {
+      const text = x.match[1].trim().replace(/\[@([^\]\s]+)\]/g, (a, id) => {
         return registerUser(id)
       })
       return {
