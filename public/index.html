@@ -6,7 +6,7 @@
       rel="stylesheet"
     />
   </head>
-  <body class="bg-black font-sans">
+  <body class="bg-black font-sans text-gray-100">
     <nav id="header" class="bg-gray-900 w-full z-10 top-0 shadow">
       <div class="w-full container mx-auto mt-0 pt-3 pb-3">
         <div class="pl-2 md:pl-0">
@@ -16,9 +16,26 @@
         </div>
       </div>
     </nav>
-    <div id="app">
-      <form v-for="task of tasks" class="mt-4">
-        <input type="submit" :value="">
+    <div id="app" class="container mx-auto">
+      <form
+        v-for="task of tasks"
+        class="my-6"
+        :key="task.name"
+        :action="'/tasks/' + task.name"
+        method="POST"
+      >
+        <h2 class="text-2xl">
+          {{ task.name }}
+        </h2>
+        <p class="text-gray-300 mb-2">
+          {{ task.description }}
+        </p>
+
+        <input
+          type="submit"
+          :value="'Run ' + task.name"
+          class="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded"
+        />
       </form>
     </div>
     <script src="https://unpkg.com/vue@2.6.10/dist/vue.min.js"></script>
@@ -35,8 +52,8 @@
             } catch (e) {
               alert(e)
             }
-          }
-        })
+          },
+        }),
       }
     </script>
   </body>

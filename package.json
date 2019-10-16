@@ -10,7 +10,9 @@
     "express": "^4.16.4",
     "express-basic-auth": "^1.2.0",
     "lodash": "^4.17.15",
-    "uuid": "^3.3.3"
+    "tkt": "^2.0.0",
+    "bson-objectid": "^1.2.5",
+    "dotenv": "^8.1.0"
   },
   "engines": {
     "node": "12.x"
