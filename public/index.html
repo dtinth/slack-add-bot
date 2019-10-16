@@ -1,23 +1,9 @@
 <html>
   <head>
-    <link href="https://unpkg.com/primer/build/build.css" rel="stylesheet" />
+    <title>glitch-task-runner</title>
+    <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
   </head>
   <body>
-    <div class="container-lg px-3 my-5 markdown-body js-main">
-      Loading...
-    </div>
-    <div style="position:fixed;top:4px;left:4px">
-      <button accesskey="r" id="reload" class="btn">
-        Reload
-      </button>
-    </div>
-    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-    <script>
-      $(() => {
-        const load = () => $('.js-main').css('opacity', 0.5).load('/changelog', () => $('.js-main').css('opacity', 1))
-        load()
-        $('#reload').click(load)
-      })
-    </script>
+    Hello!
   </body>
 </html>
