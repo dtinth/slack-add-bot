@@ -8,9 +8,10 @@ const express = require('express')
 const basicAuth = require('express-basic-auth')
 const app = express()
 const tasks = require('./tasks')
+const uuidv4 = require('uuid/v4')
 
 const authenticated = basicAuth({
-  users: { admin: process.env.ADMIN_PASSWORD },
+  users: { admin: process.env.TASK_RUNNER_ADMIN_PASSWORD },
   challenge: true,
   realm: 'glitch-task-runner',
 })
@@ -18,14 +19,38 @@ const authenticated = basicAuth({
 app.use(authenticated)
 app.use(express.static('public'))
 
+app.get('/tasks', async (req, res, next) => {
+  res.json(Array.from(Object.entries(tasks)).map(([key, t]) => {
+    return {
+      name: t,
+    }
+  }))
+})
+
 app.post('/tasks/:taskName', async (req, res, next) => {
   const taskName = req.params.taskName
+  const executionId = uuidv4()
   try {
     if (!Object.keys(tasks).includes(taskName)) {
       throw new Error(`Task "${taskName}" not found`)
     }
+    res.set('Content-Type', 'text/plain')
     const task = tasks[taskName]
-    await task.run({})
+    const logger = level => (...args) =>
+      res.write(
+        `[${new Date().toJSON()}] ${level} - ${require('util').format(
+          ...args,
+        )}`,
+      )
+    try {
+      const result = await task.run({
+        log: logger('log'),
+        warn: logger('warn'),
+        error: logger('error'),
+      })
+    } catch (e) {
+      logger.error(`Task execution failed: ${(e && e.stack) || e}\n`)
+    }
     res.end()
   } catch (e) {
     next(e)

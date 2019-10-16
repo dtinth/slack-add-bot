@@ -1,9 +1,43 @@
 <html>
   <head>
     <title>glitch-task-runner</title>
-    <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
+    <link
+      href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
   </head>
-  <body>
-    Hello!
+  <body class="bg-black font-sans">
+    <nav id="header" class="bg-gray-900 w-full z-10 top-0 shadow">
+      <div class="w-full container mx-auto mt-0 pt-3 pb-3">
+        <div class="pl-2 md:pl-0">
+          <span class="text-gray-100 text-base xl:text-xl font-bold">
+            glitch-task-runner
+          </span>
+        </div>
+      </div>
+    </nav>
+    <div id="app">
+      <form v-for="task of tasks" class="mt-4">
+        <input type="submit" :value="">
+      </form>
+    </div>
+    <script src="https://unpkg.com/vue@2.6.10/dist/vue.min.js"></script>
+    <script>
+      const App = {
+        instance: new Vue({
+          el: '#app',
+          data: {
+            tasks: [],
+          },
+          async mounted() {
+            try {
+              this.tasks = await fetch('/tasks').then(r => r.json())
+            } catch (e) {
+              alert(e)
+            }
+          }
+        })
+      }
+    </script>
   </body>
 </html>
