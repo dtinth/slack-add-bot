@@ -17,6 +17,8 @@ const authenticated = basicAuth({
 })
 
 app.use(authenticated)
+app.use(require('body-parser').urlencoded({ extended: false }))
+app.use(require('body-parser').json())
 app.use(express.static('public'))
 
 app.get('/tasks', async (req, res, next) => {
@@ -25,6 +27,7 @@ app.get('/tasks', async (req, res, next) => {
       return {
         name: key,
         description: t.description,
+        options: t.options || {},
       }
     }),
   )
@@ -46,14 +49,21 @@ app.post('/tasks/:taskName', async (req, res, next) => {
       res.write(`${text}\r\n`)
       console.log(`${executionId} ${text}`)
     }
+    const args = Object.fromEntries(
+      Object.entries(req.body || {})
+        .filter(([k]) => k.startsWith('args[') && k.endsWith(']'))
+        .map(([k, v]) => [k.substr(5).substr(0, -1), v]),
+    )
+    logger('log')('Received request with args', args)
     try {
       const result = await task.run({
         log: logger('log'),
         warn: logger('warn'),
         error: logger('error'),
+        args: args,
       })
     } catch (e) {
-      logger.error(`Task execution failed: ${(e && e.stack) || e}\n`)
+      logger('error')(`Task execution failed: ${(e && e.stack) || e}\n`)
     }
     res.end()
   } catch (e) {
