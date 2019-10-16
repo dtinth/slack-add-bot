@@ -52,7 +52,7 @@ app.post('/tasks/:taskName', async (req, res, next) => {
     const args = Object.fromEntries(
       Object.entries(req.body || {})
         .filter(([k]) => k.startsWith('args[') && k.endsWith(']'))
-        .map(([k, v]) => [k.substr(5).substr(0, -1), v]),
+        .map(([k, v]) => [k.slice(5, -1), v]),
     )
     logger('log')('Received request with args', args)
     try {
