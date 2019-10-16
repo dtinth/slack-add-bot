@@ -16,5 +16,15 @@ module.exports = {
     async run(context) {
       throw new Error('oops')
     }
+  },
+  add: {
+    description: 'Adds in 2 numbers...',
+    options: {
+      a: { description: 'First number' },
+      b: { description: 'Second number' },
+    },
+    async run(context) {
+      context.log(+context.args.a + +context.args.b)
+    }
   }
 }

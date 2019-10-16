@@ -1,7 +1,7 @@
 const tasks = require('./tasks')
 require('dotenv').config()
 
-Array.from(Object.entries(tasks))
+Object.entries(tasks)
   .reduce((cli, [key, task]) => {
     const logger = level => (...args) =>
       console.log(
@@ -12,9 +12,20 @@ Array.from(Object.entries(tasks))
     return cli.command(
       `${key}`,
       task.description || `Run task ${key}`,
-      task.options || {},
+      Object.fromEntries(
+        Object.entries(task.options || {}).map(([name, option]) => {
+          return [
+            name,
+            {
+              description: option.description || `Argument "${name}"`,
+              demand: true,
+              type: 'string',
+            },
+          ]
+        }),
+      ),
       async args => {
-        task.run({
+        return task.run({
           args,
           log: logger('log'),
           warn: logger('warn'),
