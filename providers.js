@@ -20,4 +20,6 @@ function getGitHubClient(installationId) {
   return octokit
 }
 
-exports.githubRepo = {}
+exports.githubRepo = {
+  configure(params) {},
+}

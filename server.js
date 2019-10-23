@@ -7,6 +7,7 @@ if (process.env.GIT_EMAIL) {
 const express = require('express')
 const app = express()
 const ObjectID = require('bson-objectid')
+const services = require('./services')
 
 app.use(require('body-parser').urlencoded({ extended: false, verify }))
 app.use(require('body-parser').json({ verify }))
@@ -37,7 +38,11 @@ app.post('/add', async (req, res, next) => {
     return
   }
   try {
-    const envKey = {}
+    const service = services.get(match[2])
+    if (!service) {
+      res.json({ text: `Did not find service with a name "${match[2]}"` })
+      return
+    }
     res.json({ text: 'meow', response_type: 'in_channel' })
   } catch (e) {
     next(e)
