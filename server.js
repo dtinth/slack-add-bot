@@ -5,35 +5,19 @@ if (process.env.GIT_EMAIL) {
 }
 
 const express = require('express')
-const basicAuth = require('express-basic-auth')
 const app = express()
 const tasks = require('./tasks')
 const ObjectID = require('bson-objectid')
 
-const authenticated = basicAuth({
-  users: { admin: process.env.TASK_RUNNER_ADMIN_PASSWORD },
-  challenge: true,
-  realm: 'glitch-task-runner',
-})
-
-app.use(authenticated)
-app.use(require('body-parser').urlencoded({ extended: false }))
-app.use(require('body-parser').json())
+app.use(require('body-parser').urlencoded({ extended: false, verify }))
+app.use(require('body-parser').json({ verify }))
 app.use(express.static('public'))
 
-app.get('/tasks', async (req, res, next) => {
-  res.json(
-    Array.from(Object.entries(tasks)).map(([key, t]) => {
-      return {
-        name: key,
-        description: t.description,
-        options: t.options || {},
-      }
-    }),
-  )
-})
+function verify(req, res, buf, encoding) {
+  require('crypto').createHmac('sha256', process.env.SLACK_SIGNING_SECRET)
+}
 
-app.post('/tasks/:taskName', async (req, res, next) => {
+app.post('/add', async (req, res, next) => {
   const taskName = req.params.taskName
   const executionId = ObjectID.generate()
   try {
