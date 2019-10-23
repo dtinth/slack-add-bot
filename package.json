@@ -4,7 +4,8 @@
   "description": "Task runner for Glitch.",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "pull": "git pull https://github.com/dtinth/slack-add-bot.git master && refresh"
   },
   "dependencies": {
     "express": "^4.16.4",
