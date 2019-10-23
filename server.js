@@ -14,42 +14,26 @@ app.use(require('body-parser').json({ verify }))
 app.use(express.static('public'))
 
 function verify(req, res, buf, encoding) {
-  require('crypto').createHmac('sha256', process.env.SLACK_SIGNING_SECRET)
+  const ts = req.get('X-Slack-Request-Timestamp')
+  const basestring = Buffer.concat([Buffer.from(`v0:${ts}:`), buf])
+  const expected =
+    'v0=' +
+    require('crypto')
+      .createHmac('sha256', process.env.SLACK_SIGNING_SECRET)
+      .update(basestring)
+      .digest('hex')
+  const actual = req.get('X-Slack-Signature')
+  if (expected !== actual) {
+    console.error('Invalid signature', { actual, expected })
+    throw new Error('Invalid signature!')
+  }
 }
 
 app.post('/add', async (req, res, next) => {
   const taskName = req.params.taskName
   const executionId = ObjectID.generate()
   try {
-    if (!Object.keys(tasks).includes(taskName)) {
-      throw new Error(`Task "${taskName}" not found`)
-    }
-    res.set('Content-Type', 'text/plain')
-    const task = tasks[taskName]
-    const logger = level => (...args) => {
-      const text = `[${new Date().toJSON()}] ${level} - ${require('util').format(
-        ...args,
-      )}`
-      res.write(`${text}\r\n`)
-      console.log(`${executionId} ${text}`)
-    }
-    const args = Object.fromEntries(
-      Object.entries(req.body || {})
-        .filter(([k]) => k.startsWith('args[') && k.endsWith(']'))
-        .map(([k, v]) => [k.slice(5, -1), v]),
-    )
-    logger('log')('Received request with args', args)
-    try {
-      const result = await task.run({
-        log: logger('log'),
-        warn: logger('warn'),
-        error: logger('error'),
-        args: args,
-      })
-    } catch (e) {
-      logger('error')(`Task execution failed: ${(e && e.stack) || e}\n`)
-    }
-    res.end()
+    res.json({ text: 'meow' })
   } catch (e) {
     next(e)
   }
