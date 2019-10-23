@@ -1,6 +1,6 @@
 <html>
   <head>
-    <title>glitch-task-runner</title>
+    <title>/add</title>
     <link
       href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css"
       rel="stylesheet"
@@ -11,65 +11,23 @@
       <div class="w-full container mx-auto mt-0 pt-3 pb-3">
         <div class="pl-2 md:pl-0">
           <span class="text-gray-100 text-base xl:text-xl font-bold">
-            glitch-task-runner
+            /add slack bot
           </span>
         </div>
       </div>
     </nav>
-    <div id="app" class="container mx-auto">
-      <form
-        v-for="task of tasks"
-        class="my-6"
-        :key="task.name"
-        :action="'/tasks/' + task.name"
-        method="POST"
-      >
-        <h2 class="text-2xl">
-          {{ task.name }}
-        </h2>
-        <p class="text-gray-300 mb-2">
-          {{ task.description }}
-        </p>
-        <div class="mb-4" v-for="option, key of task.options" :key="key">
-          <label
-            class="block text-gray-500 text-sm font-bold mb-2"
-            :for="'task-' + task.name + '-option-' + key"
-          >
-            {{ key }}
-          </label>
-          <input
-            class="shadow appearance-none border border-gray-700 rounded w-full py-2 px-3 bg-gray-900 text-gray-200 leading-tight focus:outline-none focus:shadow-outline"
-            :id="'task-' + task.name + '-option-' + key"
-            type="text"
-            :placeholder="option.description"
-            :name="'args[' + key + ']'"
-          />
-        </div>
-
-        <input
-          type="submit"
-          :value="'Run ' + task.name"
-          class="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded"
-        />
-      </form>
+    <div id="app" class="container mx-auto p-4">
+      <p class="mb-4">
+        See
+        <a class="text-blue-200" href="https://github.com/dtinth/slack-add-bot"
+          >https://github.com/dtinth/slack-add-bot</a
+        >
+        for usage.
+      </p>
+      <p class="mb-4">
+        <strong>Slack Request URL:</strong>
+      </p>
+      <pre class="text-green-300"><script>document.write(location.protocol + '//' + location.host)</script>/add</pre>
     </div>
-    <script src="https://unpkg.com/vue@2.6.10/dist/vue.min.js"></script>
-    <script>
-      const App = {
-        instance: new Vue({
-          el: '#app',
-          data: {
-            tasks: [],
-          },
-          async mounted() {
-            try {
-              this.tasks = await fetch('/tasks').then(r => r.json())
-            } catch (e) {
-              alert(e)
-            }
-          },
-        }),
-      }
-    </script>
   </body>
 </html>
