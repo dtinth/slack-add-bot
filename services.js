@@ -29,7 +29,7 @@ function discoverServices() {
   return {
     availableServices,
     get(name) {
-      return availableServices.get(`${name}`.toUpperCase())
+      return availableServices.get(`${name}`.toUpperCase().replace(/\s+/g, '_'))
     },
   }
 }

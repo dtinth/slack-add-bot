@@ -8,6 +8,7 @@ const express = require('express')
 const app = express()
 const ObjectID = require('bson-objectid')
 const services = require('./services')
+const axios = require('axios')
 
 app.use(require('body-parser').urlencoded({ extended: false, verify }))
 app.use(require('body-parser').json({ verify }))
@@ -32,31 +33,37 @@ function verify(req, res, buf, encoding) {
 app.post('/add', async (req, res, next) => {
   const executionId = ObjectID.generate()
   const { text } = req.body
-  const match = text.match(/^(\S+)\s+to\s+(\S+)$/)
+  const match = text.match(/^(\S+)\s+to\s+(.+)$/)
   if (!match) {
     res.json({ text: getUsage() })
     return
   }
+  const logger = level => (...args) => {
+    const text = `[${new Date().toJSON()}] ${level} - ${require('util').format(
+      ...args,
+    )}`
+    console.log(`${executionId} ${text}`)
+  }
+  const service = services.get(match[2])
+  if (!service) {
+    res.json({ text: `Did not find service with a name "${match[2]}"` })
+    return
+  }
+  res.json({ text: `Processing your request…`, response_type: 'in_channel' })
   try {
-    const logger = level => (...args) => {
-      const text = `[${new Date().toJSON()}] ${level} - ${require('util').format(
-        ...args,
-      )}`
-      res.write(`${text}\r\n`)
-      console.log(`${executionId} ${text}`)
+    try {
+      const result = await service.instance.add(match[1], {
+        log: logger('log'),
+        warn: logger('warn'),
+        error: logger('error'),
+      })
+      await axios.post(req.body.response_url, { text: result.text, response_type: 'in_channel' })
+    } catch (e) {
+      console.error(e)
+      await axios.post(req.body.response_url, { text: `Failed to add: ${e}`, response_type: 'in_channel' })
     }
-    const service = services.get(match[2])
-    if (!service) {
-      res.json({ text: `Did not find service with a name "${match[2]}"` })
-      return
-    }
-    const result = await service.add(match[1], {
-      log: logger('log'),
-      warn: logger('warn'),
-      error: logger('error'),
-    })
-    res.json({ text: result.text, response_type: 'in_channel' })
   } catch (e) {
+    console.error(e)
   }
 })
 
@@ -65,7 +72,7 @@ function getUsage() {
     '*Usage:* /add PERSON to SERVICE',
     '',
     '*Examples:*',
-    '/add dtinth to github',
+    '/add dtinth to service',
   ].join('\n')
 }
 
