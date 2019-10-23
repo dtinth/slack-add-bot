@@ -42,3 +42,24 @@ exports.githubRepo = {
     }
   },
 }
+
+exports.githubTeam = {
+  configure(params) {
+    const installationId = params.installationId || invariant(false, 'Missing param installationId')
+    const teamId = params.teamId || invariant(false, 'Missing param owner')
+    const role = params.role || 'member'
+    return {
+      async add(addee, context) {
+        // https://github.com/shinnn/github-username-regex/blob/master/index.js
+        if (!addee.match(/^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i)) {
+          return { text: 'Invalid username format' }
+        }
+        context.log('Getting GitHub client')
+        const octokit = await getGitHubClient(installationId)
+        context.log('Inviting')
+        const result = await octokit.teams.addOrUpdateMembership({ team_id: teamId, username: addee, role })
+        return { text: `Invited ${addee} to team.\nPlease check your email!`}
+      },
+    }
+  },
+}
