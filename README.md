@@ -6,6 +6,11 @@ It is sometimes painful to have to ask for everyone email and send out invites i
 
 This is a self-service Slack bot that lets people add themselves (or others) to third-party services.
 
+Currently available providers:
+
+- GitHub Repo — Invite a GitHub user to collaborate on a GitHub repository
+- GitHub Team — Add a GitHub user to a GitHub team, inviting them to the organization if they are not part of it yet
+
 ## Concepts
 
 - **Provider** provides a service whose user can be added.
@@ -54,7 +59,7 @@ This project is built on Glitch, so that you can easily remix it, run your own i
     ADD_TO_GITHUB_REPO="githubRepo?installationId=1234567&owner=dtinth&repo=myevent-web"
     ```
 
-## Providers
+## Currently available providers
 
 ### `githubRepo`
 
@@ -65,8 +70,33 @@ Required environment variables:
 - `GH_APP_ID` — The GitHub App’s ID
 - `GH_APP_PRIVATE_KEY_BASE64` — The GitHub App’s Private Key, base64-encoded
 
+Required GitHub App scope:
+
+- **Repository permissions &rarr; Administration:** Read & write
+
 Parameters:
 
 - `installationId` — The installation ID of your GitHub App.
 - `owner` — The owner of the repository.
 - `repo` — The name of the repository.
+
+### `githubTeam`
+
+Adds a GitHub User to a GitHub Team.
+If the user being invited is not part of the organization, they will be invited via email.
+This provider utilizes the [GitHub Apps API](https://developer.github.com/apps/), and does not need a personal access token to function.
+
+Required environment variables:
+
+- `GH_APP_ID` — The GitHub App’s ID
+- `GH_APP_PRIVATE_KEY_BASE64` — The GitHub App’s Private Key, base64-encoded
+
+Required GitHub App scope:
+
+- **Organization permissions &rarr; Members:** Read & write
+
+Parameters:
+
+- `installationId` — The installation ID of your GitHub App.
+- `teamId` — The numeric team ID. Here’s [how to find a GitHub Team ID](https://fabian-kostadinov.github.io/2015/01/16/how-to-find-a-github-team-id/#comment-4560809366).
+- `role` — Either `maintainer` or `member` (default: `member`). Here’s [the relevant documentation](https://developer.github.com/v3/teams/members/#add-or-update-team-membership).
