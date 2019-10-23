@@ -13,7 +13,9 @@
     "tkt": "^2.0.0",
     "bson-objectid": "^1.2.5",
     "dotenv": "^8.1.0",
-    "body-parser": "^1.19.0"
+    "body-parser": "^1.19.0",
+    "@octokit/app": "^4.1.0",
+    "@octokit/rest": "^16.33.0"
   },
   "engines": {
     "node": "12.x"

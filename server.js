@@ -6,7 +6,6 @@ if (process.env.GIT_EMAIL) {
 
 const express = require('express')
 const app = express()
-const tasks = require('./tasks')
 const ObjectID = require('bson-objectid')
 
 app.use(require('body-parser').urlencoded({ extended: false, verify }))
