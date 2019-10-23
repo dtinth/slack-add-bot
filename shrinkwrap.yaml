@@ -6,6 +6,7 @@ dependencies:
   dotenv: 8.2.0
   express: 4.16.4
   express-basic-auth: 1.2.0
+  invariant: 2.2.4
   lodash: 4.17.15
   tkt: 2.0.0
 packages:
@@ -1527,5 +1528,6 @@ specifiers:
   dotenv: ^8.1.0
   express: ^4.16.4
   express-basic-auth: ^1.2.0
+  invariant: ^2.2.4
   lodash: ^4.17.15
   tkt: ^2.0.0

@@ -15,7 +15,8 @@
     "dotenv": "^8.1.0",
     "body-parser": "^1.19.0",
     "@octokit/app": "^4.1.0",
-    "@octokit/rest": "^16.33.0"
+    "@octokit/rest": "^16.33.0",
+    "invariant": "^2.2.4"
   },
   "engines": {
     "node": "12.x"

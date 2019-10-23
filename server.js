@@ -38,14 +38,25 @@ app.post('/add', async (req, res, next) => {
     return
   }
   try {
+    const logger = level => (...args) => {
+      const text = `[${new Date().toJSON()}] ${level} - ${require('util').format(
+        ...args,
+      )}`
+      res.write(`${text}\r\n`)
+      console.log(`${executionId} ${text}`)
+    }
     const service = services.get(match[2])
     if (!service) {
       res.json({ text: `Did not find service with a name "${match[2]}"` })
       return
     }
-    res.json({ text: 'meow', response_type: 'in_channel' })
+    const result = await service.add(match[1], {
+      log: logger('log'),
+      warn: logger('warn'),
+      error: logger('error'),
+    })
+    res.json({ text: result.text, response_type: 'in_channel' })
   } catch (e) {
-    next(e)
   }
 })
 
