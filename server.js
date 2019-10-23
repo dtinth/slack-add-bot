@@ -29,14 +29,29 @@ function verify(req, res, buf, encoding) {
 }
 
 app.post('/add', async (req, res, next) => {
-  const taskName = req.params.taskName
   const executionId = ObjectID.generate()
+  const { text } = req.body
+  const match = text.match(/^(\S+)\s+to\s+(\S+)$/)
+  if (!match) {
+    res.json({ text: getUsage() })
+    return
+  }
   try {
-    res.json({ text: 'meow' })
+    const envKey = {}
+    res.json({ text: 'meow', response_type: 'in_channel' })
   } catch (e) {
     next(e)
   }
 })
+
+function getUsage() {
+  return [
+    '*Usage:* /add PERSON to SERVICE',
+    '',
+    '*Examples:*',
+    '/add dtinth to github',
+  ].join('\n')
+}
 
 const listener = app.listen(process.env.PORT, function() {
   console.log('Your app is listening on port ' + listener.address().port)

@@ -1,23 +1,18 @@
-const { App } = require('@octokit/app')
-const Octokit = require('@octokit/rest')
+const providers = require('./providers')
 
-function getGitHubClient(installationId) {
-  const app = new App({
-    id: process.env.GH_APP_ID,
-    privateKey: Buffer.from(
-      process.env.GH_APP_PRIVATE_KEY_BASE64,
-      'base64',
-    ).toString(),
-  })
-  const octokit = new Octokit({
-    async auth() {
-      const installationAccessToken = await app.getInstallationAccessToken({
-        installationId,
-      })
-      return `token ${installationAccessToken}`
-    },
-  })
-  return octokit
+function discoverServices() {
+  const availableServices = new Map()
+  for (const k of Object.keys(process.env)) {
+    const m = k.match(/^ADD_TO_(\S+)$/)
+    if (m) {
+      availableServices.add(m[1].toUpperCase(), )
+    }
+  }
+  return {
+    get(name) {
+      return availableServices.get(`${name}`.toUpperCase())
+    }
+  }
 }
 
-exports.githubRepo = {}
+module.exports = discoverServices()
