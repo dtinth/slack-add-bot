@@ -99,10 +99,11 @@ exports.notionPage = {
     const uuidv4 = require('uuid/v4')
     return {
       async add(addee, context) {
-        // https://github.com/shinnn/github-username-regex/blob/master/index.js
-        if (!addee.match(/^\S+@\S+$/i)) {
+        const emailMatch = addee.match(/^<mailto:([^@|\s>]+@[^|\s>]+)/)
+        if (!emailMatch) {
           return { text: 'Needs an email' }
         }
+        const email = emailMatch[1]
         const client = axios.create({
           headers: {
             Cookie: `token_v2=${token};`,
@@ -112,9 +113,7 @@ exports.notionPage = {
         const {
           data: { userId },
         } = await client
-          .post('https://www.notion.so/api/v3/createEmailUser', {
-            email: addee,
-          })
+          .post('https://www.notion.so/api/v3/createEmailUser', { email })
           .catch(handleNetworkError)
         invariant(userId, 'Expected userId back, %s received', userId)
         context.log(`Inviting ${userId}...`)
