@@ -25,7 +25,8 @@ function getGitHubClient(installationId) {
 
 exports.githubRepo = {
   configure(params) {
-    const installationId = params.installationId || invariant(false, 'Missing param installationId')
+    const installationId =
+      params.installationId || invariant(false, 'Missing param installationId')
     const owner = params.owner || invariant(false, 'Missing param owner')
     const repo = params.repo || invariant(false, 'Missing param repo')
     return {
@@ -37,8 +38,14 @@ exports.githubRepo = {
         context.log('Getting GitHub client')
         const octokit = await getGitHubClient(installationId)
         context.log('Inviting')
-        const result = await octokit.repos.addCollaborator({ owner, repo, username: addee })
-        return { text: `Invited ${result.data.invitee.login} to ${owner}/${repo}.\nSee invitation at ${result.data.html_url}`}
+        const result = await octokit.repos.addCollaborator({
+          owner,
+          repo,
+          username: addee,
+        })
+        return {
+          text: `Invited ${result.data.invitee.login} to ${owner}/${repo}.\nSee invitation at ${result.data.html_url}`,
+        }
       },
     }
   },
@@ -46,7 +53,8 @@ exports.githubRepo = {
 
 exports.githubTeam = {
   configure(params) {
-    const installationId = params.installationId || invariant(false, 'Missing param installationId')
+    const installationId =
+      params.installationId || invariant(false, 'Missing param installationId')
     const teamId = params.teamId || invariant(false, 'Missing param owner')
     const role = params.role || 'member'
     return {
@@ -58,8 +66,12 @@ exports.githubTeam = {
         context.log('Getting GitHub client')
         const octokit = await getGitHubClient(installationId)
         context.log('Inviting')
-        const result = await octokit.teams.addOrUpdateMembership({ team_id: teamId, username: addee, role })
-        return { text: `Invited ${addee} to team.\nPlease check your email!`}
+        const result = await octokit.teams.addOrUpdateMembership({
+          team_id: teamId,
+          username: addee,
+          role,
+        })
+        return { text: `Invited ${addee} to team.\nPlease check your email!` }
       },
     }
   },
@@ -67,21 +79,76 @@ exports.githubTeam = {
 
 exports.notionPage = {
   configure(params) {
-    const installationId = params.pageId || invariant(false, 'Missing param installationId')
-    const teamId = params.teamId || invariant(false, 'Missing param owner')
-    const role = params.role || 'member'
+    const addDashToPageId = str => {
+      const m =
+        str.match(/^(........)(....)(....)(....)(............)$/) ||
+        invariant(
+          false,
+          'Page ID should be exactly 32 characters long, %s received',
+          str.length,
+        )
+      const dashed = m.slice(1).join('-')
+      return dashed
+    }
+    const pageId = addDashToPageId(
+      params.pageId || invariant(false, 'Missing param pageId'),
+    )
+    const token =
+      process.env.NOTION_TOKEN_V2 ||
+      invariant(false, 'Missing ENV NOTION_TOKEN_V2')
+    const uuidv4 = require('uuid/v4')
     return {
       async add(addee, context) {
         // https://github.com/shinnn/github-username-regex/blob/master/index.js
-        if (!addee.match(/^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i)) {
-          return { text: 'Invalid username format' }
+        if (!addee.match(/^\S+@\S+$/i)) {
+          return { text: 'Needs an email' }
         }
-        context.log('Getting GitHub client')
-        const octokit = await getGitHubClient(installationId)
-        context.log('Inviting')
-        const result = await octokit.teams.addOrUpdateMembership({ team_id: teamId, username: addee, role })
-        return { text: `Invited ${addee} to team.\nPlease check your email!`}
+        const client = axios.create({
+          headers: {
+            Cookie: `token_v2=${token};`,
+          },
+        })
+        context.log('Getting user ID')
+        const {
+          data: { userId },
+        } = await client
+          .post('https://www.notion.so/api/v3/createEmailUser', {
+            email: addee,
+          })
+          .catch(handleNetworkError)
+        invariant(userId, 'Expected userId back, %s received', userId)
+        context.log(`Inviting ${userId}...`)
+        const { data } = await client
+          .post('https://www.notion.so/api/v3/submitTransaction', {
+            requestId: uuidv4(),
+            transactions: [
+              {
+                id: uuidv4(),
+                operations: [
+                  {
+                    table: 'block',
+                    id: pageId,
+                    command: 'setPermissionItem',
+                    path: ['permissions'],
+                    args: {
+                      type: 'user_permission',
+                      role: 'editor',
+                      user_id: userId,
+                    },
+                  },
+                ],
+              },
+            ],
+          })
+          .catch(handleNetworkError)
+        console.log('Received data', data)
+        return { text: `Added ${addee} to Notion page.` }
       },
     }
   },
+}
+
+function handleNetworkError(e) {
+  console.error('Network error:', e)
+  throw e
 }
